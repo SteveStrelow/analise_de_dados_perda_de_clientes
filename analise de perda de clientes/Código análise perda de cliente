@@ -1,0 +1,58 @@
+# Análise de dados e motivos pela perda de 26% de clientes de telecom
+#importar e visualizar a base de dados
+import pandas as pd
+
+tabela = pd.read_csv("telecom_users.csv")
+# tratar a base de dados, excluir colunas desnecessárias
+tabela = tabela.drop("Unnamed: 0", axis=1)
+#axis = 0 -> linha, axis = 1 -> coluna
+print(tabela)
+
+# tratamento de dados
+# ajustar valores reconhecidos de forma errada
+# corrigir valores vazios e colunas vazias
+print(tabela.info()) # dados TotalGasto está como objeto, mudar para numerico
+tabela["TotalGasto"] = pd.to_numeric(tabela["TotalGasto"], errors = "coerce")
+print(tabela.info())
+
+# excluir colunas totalmente vazias
+tabela = tabela.dropna(how="all", axis = 1)
+# excluir linhas com algum valor vazio
+tabela = tabela.dropna(how="any", axis = 0)
+print(tabela.info())
+
+# Análise simples, entender os cancelamentos
+print(tabela["Churn"].value_counts())
+print(tabela["Churn"].value_counts(normalize=True).map("{:.1%}".format)) #confirmando os 26% cancelamento
+
+!pip install plotly
+
+# análise completa, entender a causa dos cancelamentos
+import plotly.express as px
+#criar gráfico
+grafico = px.histogram(tabela, x="TotalGasto" , color="Churn", color_discrete_sequence=["green", "red"])
+#exibir grafico
+grafico.show()
+
+# criar gráfico para cada coluna da base de dados comparado com Churn
+for coluna in tabela.columns:
+    print(coluna)
+    grafico = px.histogram(tabela, x=coluna, color="Churn")
+    grafico.show()
+
+# Conclusões:
+# casados cancelam menos, ou seja, familias maiores tendem a cancelar menos
+    # pode ser oferecido um 2^ número gratuito para o cliente
+    # ou plano família
+# clientes novos cancelam mais nos primeiros meses
+    # verificar problemas enfrentados pelos clientes novos, configurações, atendimento, etc
+    # verificar ação de marketing e pós-vendas
+    # pode ser efetuada ação de bonificação nos primeiros meses
+# cancelamento muito alto na Fibra
+    # verificar causas dos cancelamentos das Fibras
+# Cancelamento alto com clientes com menos serviços
+    # Pode ser oferecido serviço extra gratuito
+# Cancelamento alto em pagamento por boleto
+    # Pode ser incentivado pagamento no débito automático ou cartão com redução de valor
+    # incentivo para contrato anual
+    
